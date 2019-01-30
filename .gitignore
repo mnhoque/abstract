@@ -3,3 +3,6 @@
 ################################################################################
 
 /.vs/Phone/v15/Server/sqlite3
+/.vs/Phone/v15/.suo
+/Phone/bin/Debug
+/Phone/obj/Debug

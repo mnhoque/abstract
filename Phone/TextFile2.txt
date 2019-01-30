@@ -1,0 +1,425 @@
+﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Phone
+{ 
+    //User Class
+    class Program
+    {
+        static void Main(string[] args)
+        {
+           // networkHub = NetworkHub.GetHub();
+          
+            Network vodaphoneNetwork = new Network();
+            vodaphoneNetwork.NetworkName = "Vodaphone";
+            NetworkHub.GlobalNetwork.registerNetwork(vodaphoneNetwork);
+            //networks.Add(vodaphoneNetwork);
+            IPhone phone;//create a general variable
+
+            phone = new Android();
+            phone.Network = vodaphoneNetwork;
+            phone.SubcriberNumber = "0000000";
+            vodaphoneNetwork.registerPhone(phone);
+
+            phone = new ApplePhone();
+            phone.Network = vodaphoneNetwork;
+            phone.SubcriberNumber = "1111111";
+            vodaphoneNetwork.registerPhone(phone);
+
+            phone = new Android();
+            phone.Network = vodaphoneNetwork;
+            phone.SubcriberNumber = "2222222";
+            vodaphoneNetwork.registerPhone(phone);
+
+
+            //vodaphoneNetwork.Phonelist[1].Call("2222222", 23, "hello");
+            //vodaphoneNetwork.Phonelist[2].Call("111111 1", 21, "hej");
+            //vodaphoneNetwork.Phonelist[2].Call("456", 20, "Please send an Ambulance quickly!");
+            //vodaphoneNetwork.Phonelist[2].Call("76767676", 88, "ghgjhghjg");
+            //Phone myPhone = vodaphoneNetwork.Phonelist[2];
+            //string log = myPhone.GetCallLog();
+            //Console.WriteLine(log);
+
+
+            /////////////////////////////////////////////////
+
+
+            Network airtelNetwork = new Network();
+            airtelNetwork.NetworkName = "Airtel";
+            NetworkHub.GlobalNetwork.registerNetwork(airtelNetwork);
+
+            //List <Phone> phonelist = new List<Phone>();
+           
+
+            phone = new ApplePhone();
+            phone.Network = airtelNetwork;
+            phone.SubcriberNumber = "33333";
+           // airtelNetwork.Phonelist.Add(phone);
+            airtelNetwork.registerPhone(phone);
+           
+
+            phone = new Android();
+            phone.Network = airtelNetwork;
+            phone.SubcriberNumber = "44444";
+            airtelNetwork.registerPhone(phone);
+
+            phone = new ApplePhone();
+            phone.Network = airtelNetwork;
+            phone.SubcriberNumber = "55555";
+            airtelNetwork.registerPhone(phone);
+
+            phone = new ApplePhone();
+            phone.Network = airtelNetwork;
+            phone.SubcriberNumber = "1111111";
+            airtelNetwork.registerPhone(phone);
+
+
+            //airtelNetwork.Phonelist[1].Call("44444", 23, "hello");
+            //airtelNetwork.Phonelist[2].Call("55555", 21, "hej");
+            //airtelNetwork.Phonelist[2].Call("456", 20, "Please send an Ambulance quickly!");
+            //airtelNetwork.Phonelist[2].Call("76767676", 88, "ghgjhghjg");
+
+            // airtelNetwork.Phonelist[1].Call("1111111", 11, "outer network call");
+            IPhone p = airtelNetwork.getPhone("44444");
+            p.Call("1111111", 11, "outer network call");
+
+            //airtelNetwork.getPhone("44444").Call("1111111", 11, "outer network call");
+
+            airtelNetwork.Phonelist[1].Call("55555", 11, "inter network call");
+
+          
+            //myPhone = airtelNetwork.Phonelist[2];
+            //log = myPhone.GetCallLog();
+
+            Console.WriteLine(airtelNetwork.Phonelist[1].GetCallLog());
+
+            Console.ReadKey();
+        }
+    }
+
+    public class NetworkHub
+    {
+        private static List<Network> networks = new List<Network>();
+
+        private static NetworkHub networkHub = null; //only one instance should be available
+
+
+        private NetworkHub()//prohibits direct object creation
+        {
+
+        }
+
+        public static NetworkHub GlobalNetwork
+        {
+            get
+            {
+                if (networkHub == null)
+                    networkHub = new NetworkHub();
+
+                return networkHub;
+            }
+        }
+
+        public List<Network> Networks
+        {
+            get
+            {
+                return NetworkHub.networks;
+            }
+        }
+
+        public void registerNetwork(Network network)
+        {
+            networks.Add(network);
+        }
+
+    }
+
+    public class Network
+    {
+        public string NetworkName;
+        public List<IPhone> Phonelist = new List<IPhone>();
+        
+        // bool registerPhoneNumber = false;
+        public bool registerPhone(IPhone phone)
+        {
+            bool match = false;
+            for (int i = 0; i <= NetworkHub.GlobalNetwork.Networks.Count-1; i++)
+            {
+                for(int k =0; k<= NetworkHub.GlobalNetwork.Networks[i].Phonelist.Count-1; k++)
+                {
+                    if (NetworkHub.GlobalNetwork.Networks[i].Phonelist[k].SubcriberNumber == phone.SubcriberNumber)
+                    {
+
+                        Console.WriteLine("Duplicate registration detected for: " + phone.SubcriberNumber);
+                        match = true;
+                        break;
+
+                    }
+
+                }
+                
+            }
+            if (match == false)
+            {
+              
+                Phonelist.Add(phone);
+                //registerPhoneNumber = true;
+            }
+            //return registerPhoneNumber;
+            return !match;
+
+        }
+
+        public IPhone getPhone(string PhoneNumber)
+        {
+            for(int i = 0; i <= Phonelist.Count - 1; i++)
+            {
+                if (Phonelist[i].SubcriberNumber == PhoneNumber)
+                {
+                    return Phonelist[i];
+                }
+            }
+            
+            return null;
+        }
+
+    }
+
+    public class EmmergencyService
+    {
+        public static string[] immergencyPhoneNumberList = { "999", "112", "456" };
+        public static string[] immergencyServiceOrganisation = { "Police", "Fire Service", "Ambulance" };
+
+    }
+
+    public interface IPhone
+    {
+        Network Network { get; set; }
+        string SubcriberNumber { get; set; }
+        List<CallLog> CallLogList { get; set; }
+        void Call(string receiverSubcriberNumber, int durationInSec, string message);       
+        string GetCallLog();
+    }
+
+    public class CallLog
+    {
+        public string subcriberNumber;
+        public string callType;
+        public int durationInSec;
+        public string message;
+    }
+    
+    public class Android : IPhone
+    {
+        //public   List<Phone> Phonelist = new List<Phone>();
+        public Network Network { get; set; }
+
+        public string SubcriberNumber { get; set; }
+
+        public List<CallLog> CallLogList { get; set; } = new List<CallLog>();
+
+
+        public void Call(string receiverSubcriberNumber, int durationInSec, string message)
+        {
+            CallLog callLog;
+            if (this.SubcriberNumber == receiverSubcriberNumber)
+            {
+                callLog = new CallLog();
+                callLog.subcriberNumber = this.SubcriberNumber;
+                string x = "OutGoing";
+                callLog.callType = x.Substring(0, 3);
+                callLog.durationInSec = 0;
+                callLog.message = null;
+                CallLogList.Add(callLog);
+                Console.WriteLine("Self call is not possible");
+                return;
+            }
+            bool match = false;
+            for(int i = 0; i <= NetworkHub.GlobalNetwork.Networks.Count - 1; i++)
+            {
+                for (int j = 0; j <= NetworkHub.GlobalNetwork.Networks[i].Phonelist.Count - 1; j++)
+                {
+
+                    if (NetworkHub.GlobalNetwork.Networks[i].Phonelist[j].SubcriberNumber == receiverSubcriberNumber)
+                    {
+                        //outgoing call log
+                        CallLog callLogOutGoing = new CallLog();
+                        callLogOutGoing.subcriberNumber = receiverSubcriberNumber;
+                        string x = "OutGoing";
+                        callLogOutGoing.callType = x.Substring(0, 3);
+                        callLogOutGoing.durationInSec = durationInSec;
+                        callLogOutGoing.message = message;
+                        this.CallLogList.Add(callLogOutGoing);
+
+                        //incoming call log
+                        CallLog callLogIncoming = new CallLog();
+                        callLogIncoming.subcriberNumber = this.SubcriberNumber;
+                        string y = "Incoming";
+                        callLogIncoming.callType = y.Substring(0, 2);
+                        callLogIncoming.durationInSec = durationInSec;
+                        callLogIncoming.message = message;
+                        NetworkHub.GlobalNetwork.Networks[i].Phonelist[j].CallLogList.Add(callLogIncoming);///
+                        match = true;
+
+                    }
+                    
+                }
+            }
+            for (int i = 0; i <= EmmergencyService.immergencyPhoneNumberList.Length - 1; i++)
+            {
+                if (EmmergencyService.immergencyPhoneNumberList[i] == receiverSubcriberNumber)
+                {
+                    CallLog callLogOutGoing = new CallLog();
+                    callLogOutGoing.subcriberNumber = receiverSubcriberNumber;
+                    string x = "OutGoing";
+                    callLogOutGoing.callType = x.Substring(0, 3);
+                    callLogOutGoing.durationInSec = durationInSec;
+                    callLogOutGoing.message = EmmergencyService.immergencyServiceOrganisation[i] + ": " + message;
+                    CallLogList.Add(callLogOutGoing);
+                    match = true;
+                }
+            }
+            if (match == false)
+            {
+                callLog = new CallLog();
+                callLog.subcriberNumber = receiverSubcriberNumber;
+                string x = "Outgoing";
+                callLog.callType = x.Substring(0, 3);
+                callLog.durationInSec = 0;
+                callLog.message = null;
+                CallLogList.Add(callLog);
+                Console.WriteLine("The subscriber number " + receiverSubcriberNumber + " not found!");
+            }
+
+        }
+
+        public string GetCallLog()
+        {
+            string myCallLog = "";
+            myCallLog = myCallLog + "Printing calllog for " + this.SubcriberNumber + "\n";
+            myCallLog = myCallLog + "Call Type " + "Subscription Number" + "Duration " + "Message" + "\n";
+
+            for (int x = 0; x <= this.CallLogList.Count - 1; x++)
+            {
+                myCallLog = myCallLog + this.CallLogList[x].callType + " " + this.CallLogList[x].subcriberNumber + " " + this.CallLogList[x].durationInSec + " " + this.CallLogList[x].message + "\n";
+
+            }
+            return myCallLog;
+        }
+
+        public bool Bluetooth()
+        {
+            return true;
+        }
+    }
+
+    public class ApplePhone : IPhone
+    {
+        //public   List<Phone> Phonelist = new List<Phone>();
+        public Network Network { get; set; }
+
+        public string SubcriberNumber { get; set; }
+
+        public List<CallLog> CallLogList { get; set; } = new List<CallLog>();
+
+
+        public void Call(string receiverSubcriberNumber, int durationInSec, string message)
+        {
+            CallLog callLog;
+            if (this.SubcriberNumber == receiverSubcriberNumber)
+            {
+                callLog = new CallLog();
+                callLog.subcriberNumber = this.SubcriberNumber;
+                string x = "OutGoing";
+                callLog.callType = x.Substring(0, 3);
+                callLog.durationInSec = 0;
+                callLog.message = null;
+                CallLogList.Add(callLog);
+                Console.WriteLine("Self call is not possible");
+                return;
+            }
+            bool match = false;
+            for (int i = 0; i <= NetworkHub.GlobalNetwork.Networks.Count - 1; i++)
+            {
+                for (int j = 0; j <= NetworkHub.GlobalNetwork.Networks[i].Phonelist.Count - 1; j++)
+                {
+
+                    if (NetworkHub.GlobalNetwork.Networks[i].Phonelist[j].SubcriberNumber == receiverSubcriberNumber)
+                    {
+                        //outgoing call log
+                        CallLog callLogOutGoing = new CallLog();
+                        callLogOutGoing.subcriberNumber = receiverSubcriberNumber;
+                        string x = "OutGoing";
+                        callLogOutGoing.callType = x.Substring(0, 3);
+                        callLogOutGoing.durationInSec = durationInSec;
+                        callLogOutGoing.message = message;
+                        this.CallLogList.Add(callLogOutGoing);
+
+                        //incoming call log
+                        CallLog callLogIncoming = new CallLog();
+                        callLogIncoming.subcriberNumber = this.SubcriberNumber;
+                        string y = "Incoming";
+                        callLogIncoming.callType = y.Substring(0, 2);
+                        callLogIncoming.durationInSec = durationInSec;
+                        callLogIncoming.message = message;
+                        NetworkHub.GlobalNetwork.Networks[i].Phonelist[j].CallLogList.Add(callLogIncoming);///
+                        match = true;
+
+                    }
+
+                }
+            }
+            for (int i = 0; i <= EmmergencyService.immergencyPhoneNumberList.Length - 1; i++)
+            {
+                if (EmmergencyService.immergencyPhoneNumberList[i] == receiverSubcriberNumber)
+                {
+                    CallLog callLogOutGoing = new CallLog();
+                    callLogOutGoing.subcriberNumber = receiverSubcriberNumber;
+                    string x = "OutGoing";
+                    callLogOutGoing.callType = x.Substring(0, 3);
+                    callLogOutGoing.durationInSec = durationInSec;
+                    callLogOutGoing.message = EmmergencyService.immergencyServiceOrganisation[i] + ": " + message;
+                    CallLogList.Add(callLogOutGoing);
+                    match = true;
+                }
+            }
+            if (match == false)
+            {
+                callLog = new CallLog();
+                callLog.subcriberNumber = receiverSubcriberNumber;
+                string x = "Outgoing";
+                callLog.callType = x.Substring(0, 3);
+                callLog.durationInSec = 0;
+                callLog.message = null;
+                CallLogList.Add(callLog);
+                Console.WriteLine("The subscriber number " + receiverSubcriberNumber + " not found!");
+            }
+
+        }
+
+        public string GetCallLog()
+        {
+            string myCallLog = "";
+            myCallLog = myCallLog + "Printing calllog for " + this.SubcriberNumber + "\n";
+            myCallLog = myCallLog + "Call Type " + "Subscription Number" + "Duration " + "Message" + "\n";
+
+            for (int x = 0; x <= this.CallLogList.Count - 1; x++)
+            {
+                myCallLog = myCallLog + this.CallLogList[x].callType + " " + this.CallLogList[x].subcriberNumber + " " + this.CallLogList[x].durationInSec + " " + this.CallLogList[x].message + "\n";
+
+            }
+            return myCallLog;
+        }
+    }
+
+  
+
+}
+
+
+
